@@ -1,0 +1,65 @@
+using Microsoft.EntityFrameworkCore;
+using SkillHub.Models;
+
+namespace SkillHub.Data;
+
+public class SkillHubDbContext : DbContext
+{
+    public SkillHubDbContext(DbContextOptions<SkillHubDbContext> options)
+        : base(options) { }
+
+    public DbSet<User> Users { get; set; }
+    public DbSet<Session> Sessions { get; set; }
+    public DbSet<Enrollment> Enrollments { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<Report> Reports { get; set; }
+    public DbSet<UploadedFile> UploadedFiles { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Enrollment>()
+            .HasKey(e => new { e.UserId, e.SessionId });
+
+        modelBuilder.Entity<Enrollment>()
+            .HasOne(e => e.User)
+            .WithMany(u => u.Enrollments)
+            .HasForeignKey(e => e.UserId);
+
+        modelBuilder.Entity<Enrollment>()
+            .HasOne(e => e.Session)
+            .WithMany()
+            .HasForeignKey(e => e.SessionId);
+
+        modelBuilder.Entity<Session>()
+            .HasOne(s => s.Mentor)
+            .WithMany(u => u.MentoredSessions)
+            .HasForeignKey(s => s.MentorId);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Session)
+            .WithMany(s => s.Reviews)
+            .HasForeignKey(r => r.SessionId);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Learner)
+            .WithMany(u => u.Reviews)
+            .HasForeignKey(r => r.LearnerId);
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Session)
+            .WithMany(s => s.Reports)
+            .HasForeignKey(r => r.SessionId);
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Reporter)
+            .WithMany(u => u.Reports)
+            .HasForeignKey(r => r.ReporterId);
+
+        modelBuilder.Entity<UploadedFile>()
+            .HasOne(f => f.User)
+            .WithMany(u => u.UploadedFiles)
+            .HasForeignKey(f => f.UserId);
+    }
+}

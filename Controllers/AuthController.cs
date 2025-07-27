@@ -1,0 +1,46 @@
+using Microsoft.AspNetCore.Mvc;
+using SkillHub.DTOs;
+using SkillHub.Interfaces;
+
+namespace SkillHub.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController(IAuthService authService) : ControllerBase
+{
+    private readonly IAuthService _authService = authService;
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var token = await _authService.RegisterAsync(dto);
+        return Ok(new { Token = token });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginDto dto)
+    {
+        var token = await _authService.LoginAsync(dto);
+
+        if (string.IsNullOrEmpty(token))
+        {
+            return Unauthorized(new { Message = "Invalid email or password." });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        return Ok(new
+        {
+            Message = "Login successful.",
+            Token = token
+        });
+    }
+}
