@@ -14,7 +14,8 @@ public static class SeedData
                 Name = "Admin User",
                 Email = "admin@skillhub.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                Role = Role.Admin
+                Role = Role.Admin,
+                IsActive = true
             };
 
             var mentor = new User
@@ -23,7 +24,8 @@ public static class SeedData
                 Email = "mentor@skillhub.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("mentor123"),
                 Role = Role.Mentor,
-                Bio = "Experienced .NET Developer"
+                Bio = "Experienced .NET Developer",
+                IsActive = true
             };
 
             var learner = new User
@@ -31,13 +33,14 @@ public static class SeedData
                 Name = "Learner Alice",
                 Email = "learner@skillhub.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("learner123"),
-                Role = Role.Learner
+                Role = Role.Learner,
+                IsActive = true
             };
 
             context.Users.AddRange(admin, mentor, learner);
             context.SaveChanges();
 
-            var session = new Session
+            var session1 = new Session
             {
                 Title = "C# for Beginners",
                 Description = "Learn the basics of C#",
@@ -49,13 +52,25 @@ public static class SeedData
                 MentorId = mentor.Id
             };
 
-            context.Sessions.Add(session);
+            var session2 = new Session
+            {
+                Title = "Backend Development",
+                Description = "Learn backend with .NET Web API and EF Core",
+                Tags = "backend,dotnet,api",
+                Difficulty = DifficultyLevel.Intermediate,
+                StartDate = DateTime.UtcNow.AddDays(5),
+                EndDate = DateTime.UtcNow.AddDays(15),
+                Capacity = 15,
+                MentorId = mentor.Id
+            };
+
+            context.Sessions.AddRange(session1, session2);
             context.SaveChanges();
 
             var enrollment = new Enrollment
             {
-                SessionId = session.Id,
-                UserId = learner.Id, 
+                SessionId = session1.Id,
+                UserId = learner.Id,
                 EnrolledAt = DateTime.UtcNow
             };
 
@@ -64,7 +79,7 @@ public static class SeedData
 
             var review = new Review
             {
-                SessionId = session.Id,
+                SessionId = session1.Id,
                 UserId = learner.Id,
                 Rating = 5,
                 Comment = "Great session, learned a lot!",

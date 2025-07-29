@@ -7,13 +7,19 @@ namespace SkillHub.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Learner")]
+[Authorize(Policy = "LearnerOnly")]
 public class EnrollmentsController(IEnrollmentService enrollmentService) : ControllerBase
 {
     private readonly IEnrollmentService _enrollmentService = enrollmentService;
 
-    private int GetUserId() =>
-        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int GetUserId()
+    {
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(id))
+            throw new UnauthorizedAccessException("User ID not found in token.");
+
+        return int.Parse(id);
+    }
 
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string? keyword)
@@ -31,7 +37,7 @@ public class EnrollmentsController(IEnrollmentService enrollmentService) : Contr
     public async Task<IActionResult> Enroll(int sessionId)
     {
         var success = await _enrollmentService.EnrollAsync(GetUserId(), sessionId);
-        if (!success) return BadRequest("Already enrolled.");
+        if (!success) return BadRequest($"You are already enrolled in session {sessionId}.");
         return Ok("Enrolled");
     }
 

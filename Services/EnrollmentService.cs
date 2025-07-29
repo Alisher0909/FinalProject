@@ -15,10 +15,12 @@ public class EnrollmentService(SkillHubDbContext context) : IEnrollmentService
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {
-            query = query.Where(s =>
-                s.Title.Contains(keyword) ||
-                s.Description.Contains(keyword) ||
-                s.Tags.Contains(keyword));
+            keyword = keyword.ToLower();
+
+        query = query.Where(s =>
+            (s.Title != null && s.Title.ToLower().Contains(keyword)) ||
+            (s.Description != null && s.Description.ToLower().Contains(keyword)) ||
+            (s.Tags != null && s.Tags.ToLower().Contains(keyword)));
         }
 
         return await query.Select(s => new EnrolledSessionDto

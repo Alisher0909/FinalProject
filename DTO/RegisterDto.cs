@@ -4,8 +4,8 @@ namespace SkillHub.DTOs;
 
 public class RegisterDto
 {
-    public required string Name { get; set; } = null!;
-    public required string Email { get; set; } = null!;
-    public required string Password { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Email { get; set; } = default!;
+    public string Password { get; set; } = default!;
     public required Role Role { get; set; }
 }

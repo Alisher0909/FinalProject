@@ -16,16 +16,17 @@ public class ReportsController(IReportService reportService) : ControllerBase
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpPost]
-    [Authorize(Roles = "Learner,Mentor")]
+    [Authorize(Policy = "LearnerOrMentor")]
     public async Task<IActionResult> Submit(CreateReportDto dto)
     {
         var success = await _reportService.SubmitReportAsync(GetUserId(), dto);
-        if (!success) return BadRequest("SessionId yoki ReviewId bo'lishi kerak");
-        return Ok("Report yuborildi");
+        if (!success)
+            return BadRequest("Must be a SessionId or ReviewId");
+        return Ok("Report sent");
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAll()
     {
         var reports = await _reportService.GetAllReportsAsync();
@@ -33,11 +34,12 @@ public class ReportsController(IReportService reportService) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Delete(int id)
     {
         var success = await _reportService.DeleteReportAsync(id);
-        if (!success) return NotFound();
-        return Ok("Report o'chirildi");
+        if (!success)
+            return NotFound();
+        return Ok("Report deleted");
     }
 }

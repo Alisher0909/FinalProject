@@ -19,47 +19,62 @@ public class SkillHubDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Enrollment konfiguratsiyasi
         modelBuilder.Entity<Enrollment>()
             .HasKey(e => new { e.UserId, e.SessionId });
 
         modelBuilder.Entity<Enrollment>()
             .HasOne(e => e.User)
             .WithMany(u => u.Enrollments)
-            .HasForeignKey(e => e.UserId);
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Enrollment>()
             .HasOne(e => e.Session)
-            .WithMany()
-            .HasForeignKey(e => e.SessionId);
+            .WithMany(s => s.Enrollments)
+            .HasForeignKey(e => e.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        // Session ↔ Mentor
         modelBuilder.Entity<Session>()
             .HasOne(s => s.Mentor)
             .WithMany(u => u.MentoredSessions)
-            .HasForeignKey(s => s.MentorId);
+            .HasForeignKey(s => s.MentorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+        // Review ↔ Session
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Session)
             .WithMany(s => s.Reviews)
-            .HasForeignKey(r => r.SessionId);
+            .HasForeignKey(r => r.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        // Review ↔ Learner
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Learner)
             .WithMany(u => u.Reviews)
-            .HasForeignKey(r => r.LearnerId);
+            .HasForeignKey(r => r.LearnerId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+        // Report ↔ Session
         modelBuilder.Entity<Report>()
             .HasOne(r => r.Session)
             .WithMany(s => s.Reports)
-            .HasForeignKey(r => r.SessionId);
+            .HasForeignKey(r => r.SessionId)
+            .OnDelete(DeleteBehavior.SetNull);
 
+        // Report ↔ Reporter (User)
         modelBuilder.Entity<Report>()
             .HasOne(r => r.Reporter)
             .WithMany(u => u.Reports)
-            .HasForeignKey(r => r.ReporterId);
+            .HasForeignKey(r => r.ReporterId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        // UploadedFile ↔ User
         modelBuilder.Entity<UploadedFile>()
             .HasOne(f => f.User)
             .WithMany(u => u.UploadedFiles)
-            .HasForeignKey(f => f.UserId);
+            .HasForeignKey(f => f.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -8,7 +8,7 @@ namespace SkillHub.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Learner")]
+[Authorize(Policy = "LearnerOnly")]
 public class ReviewsController(IReviewService reviewService) : ControllerBase
 {
     private readonly IReviewService _reviewService = reviewService;
@@ -20,7 +20,8 @@ public class ReviewsController(IReviewService reviewService) : ControllerBase
     public async Task<IActionResult> Add(CreateReviewDto dto)
     {
         var success = await _reviewService.AddReviewAsync(GetUserId(), dto);
-        if (!success) return BadRequest("Cannot leave review. Check enrollment or existing review.");
+        if (!success)
+            return BadRequest("Cannot leave review. Check enrollment or existing review.");
         return Ok("Review submitted");
     }
 
@@ -35,7 +36,8 @@ public class ReviewsController(IReviewService reviewService) : ControllerBase
     public async Task<IActionResult> Delete(int reviewId)
     {
         var success = await _reviewService.DeleteReviewAsync(GetUserId(), reviewId);
-        if (!success) return NotFound("Review not found or unauthorized.");
+        if (!success)
+            return NotFound("Review not found or unauthorized.");
         return Ok("Review deleted");
     }
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillHub.DTOs.User;
@@ -12,91 +13,65 @@ public class UsersController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
-    [Authorize]
+    private int GetUserId() =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     [HttpGet("me")]
+    [Authorize]
     public async Task<IActionResult> GetMyProfile()
     {
-        int userId = int.Parse(User.FindFirst("id")!.Value);
-        var result = await _userService.GetMyProfileAsync(userId);
+        var result = await _userService.GetMyProfileAsync(GetUserId());
 
         if (result == null)
-        {
             return NotFound(new { Message = "User profile not found." });
-        }
 
         return Ok(new
         {
             Message = "User profile retrieved successfully.",
             User = result,
-        });  
+        });
     }
 
-    [Authorize]
     [HttpPut("me")]
+    [Authorize]
     public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateProfileDto dto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
-
-        if (dto == null)
-        {
-            return BadRequest(new { Message = "Profile data is required." });
-        }
 
         if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.Email))
-        {
             return BadRequest(new { Message = "Full name and email are required." });
-        }
 
-        int userId = int.Parse(User.FindFirst("id")!.Value);
-        var result = await _userService.UpdateMyProfileAsync(userId, dto);
+        var result = await _userService.UpdateMyProfileAsync(GetUserId(), dto);
         return Ok(result);
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost("{userId}/activate")]
-    public async Task<IActionResult> ActivateUser(int userId, [FromBody] ActivateUserDto dto)
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> ActivateUser(int userId)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
+            var result = await _userService.ActivateUserAsync(userId);
+            return Ok(new
+            {
+                Message = "User activated successfully.",
+                User = result
+            });
         }
-
-        if (dto == null)
+        catch (Exception ex)
         {
-            return BadRequest(new { Message = "Activation data is required." });
+            return BadRequest(new { Message = ex.Message });
         }
-
-        if (dto.ByUserId <= 0)
-        {
-            return BadRequest(new { Message = "Invalid user ID for activation." });
-        }
-
-        var result = await _userService.ActivateUserAsync(userId, dto);
-        return Ok(result);
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost("{userId}/deactivate")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeactivateUser(int userId, [FromBody] DeactivateUserDto dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        if (!ModelState.IsValid || dto == null || dto.ByUserId <= 0)
+            return BadRequest(new { Message = "Invalid deactivation data." });
 
-        if (dto == null)
-        {
-            return BadRequest(new { Message = "Deactivation data is required." });
-        }
-
-        if (dto.ByUserId <= 0)
-        {
-            return BadRequest(new { Message = "Invalid user ID for deactivation." });
-        }
-        
         var result = await _userService.DeactivateUserAsync(userId, dto);
         return Ok(result);
     }

@@ -3,6 +3,7 @@ namespace SkillHub.Models;
 public class Report
 {
     public int Id { get; set; }
+    public required string Message { get; set; } = default!;
 
     public int ReporterId { get; set; }
     public User Reporter { get; set; } = null!;
@@ -14,8 +15,5 @@ public class Report
     public Review? Review { get; set; }
 
     public string Reason { get; set; } = null!;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public string? Message { get; set; }
-
-
+    public DateTime CreatedAt { get; set; }
 }

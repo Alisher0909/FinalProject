@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillHub.DTOs;
 using SkillHub.Interfaces;
@@ -11,18 +12,20 @@ public class AuthController(IAuthService authService) : ControllerBase
     private readonly IAuthService _authService = authService;
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        
+
         var token = await _authService.RegisterAsync(dto);
         return Ok(new { Token = token });
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginDto dto)
     {
         var token = await _authService.LoginAsync(dto);
@@ -39,7 +42,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return Ok(new
         {
-            Message = "Login successful.",
+            Message = "Login in successfully",
             Token = token
         });
     }

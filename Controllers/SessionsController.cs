@@ -9,7 +9,7 @@ namespace SkillHub.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Mentor")]
+[Authorize(Policy = "MentorOnly")]
 public class SessionsController(ISessionService sessionService) : ControllerBase
 {
     private readonly ISessionService _sessionService = sessionService;

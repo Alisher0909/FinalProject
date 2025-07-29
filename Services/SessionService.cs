@@ -42,7 +42,7 @@ public class SessionService(SkillHubDbContext context) : ISessionService
         return sessions.Select(MapToDto).ToList();
     }
 
-    public async Task<SessionDto> UpdateSessionAsync(int sessionId, UpdateSessionDto dto)
+    public async Task<SessionDto> UpdateSessionAsync(int sessionId, int mentorId, UpdateSessionDto dto)
     {
         var session = await _context.Sessions
             .Include(s => s.Mentor)
@@ -101,10 +101,5 @@ public class SessionService(SkillHubDbContext context) : ISessionService
             MentorName = s.Mentor.Name,
             MentorAvatar = s.Mentor.AvatarUrl ?? string.Empty
         };
-    }
-
-    public Task<SessionDto> UpdateSessionAsync(int sessionId, int mentorId, UpdateSessionDto dto)
-    {
-        throw new NotImplementedException();
     }
 }
