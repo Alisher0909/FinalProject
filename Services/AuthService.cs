@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SkillHub.Data;
 using SkillHub.DTOs;
+using SkillHub.DTOs.User;
 using SkillHub.Interfaces;
 using SkillHub.Models;
 
@@ -11,6 +12,19 @@ public class AuthService(SkillHubDbContext context, IConfiguration config, IToke
     private readonly SkillHubDbContext _context = context;
     private readonly IConfiguration _config = config;
     private readonly ITokenService _tokenService = tokenService;
+
+    public async Task<List<UserDto>> GetAllUsersAsync()
+    {
+        return await _context.Users
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Role = u.Role
+            })
+            .ToListAsync();
+    }
 
     public async Task<string> RegisterAsync(RegisterDto dto)
     {

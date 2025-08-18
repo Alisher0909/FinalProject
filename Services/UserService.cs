@@ -21,7 +21,7 @@ public class UserService(SkillHubDbContext context, IHttpContextAccessor httpCon
         return new UserDto
         {
             Id = user.Id,
-            FullName = user.Name,
+            Name = user.Name,
             Email = user.Email,
             Bio = user.Bio,
             Role = user.Role
@@ -43,7 +43,7 @@ public class UserService(SkillHubDbContext context, IHttpContextAccessor httpCon
         return new UserDto
         {
             Id = user.Id,
-            FullName = user.Name,
+            Name = user.Name,
             Email = user.Email,
             Bio = user.Bio,
             Role = user.Role
